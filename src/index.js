@@ -4,7 +4,7 @@ const { Server } = require("socket.io");
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server); /* conexion de web socket */
+const io = new Server(server); /* conexion de web socket, tiene a todos los sockets conectados*/
 
 
 /* settings */

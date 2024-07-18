@@ -11,7 +11,29 @@
     <link rel="stylesheet" href="/css/main.css">
 </head>
 <body>
-    <h1>hola</h1>
+    <nav class="navbar navbar-light bg-warning">
+        <a class="navbar-brand mx-auto" href="/">Javascript Chat</a>
+    </nav>
+    <div class="container">
+        <div class="col-md-6 mt-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Lets chat</h4>
+                </div>
+                <div id="chat" class="card-body">
+                </div>
+                <form id="message-form" class="card-footer">
+                    <div class="input-group">
+                        <input type="text" id="message" class="form-control">
+                        <div class="input-group-append">
+                            <input type="submit" class="btn btn-warning">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/main.js"></script>
 </body>
