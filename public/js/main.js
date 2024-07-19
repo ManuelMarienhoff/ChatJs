@@ -40,8 +40,8 @@ $(function(){
     })
 
     /* Escucho el mensaje que viene desde el servidor */
-    socket.on('new message', function(message){
-        $chat.append(message + '<br/>')
+    socket.on('new message', function(data){
+        $chat.append(`<b> ${data.nick}</b>: ` + data.msg + '<br/>')
     } )
 
     /* Recibo todos los usuarios activos del servidor */

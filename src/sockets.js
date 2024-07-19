@@ -21,8 +21,11 @@ module.exports = function(io){
         }); 
 
         /* el servidor escucha el mensaje que se manda desde el cliente y lo reenvia a todos los clientes */
-        socket.on('send message', function(data){  /* escucho mensaje del cliente */
-            io.sockets.emit('new message', data) /* envio datos a todos los sockets */
+        socket.on('send message', data =>{  /* escucho mensaje del cliente */
+            io.sockets.emit('new message', {
+                msg: data,
+                nick: socket.nickname
+            }) /* envio datos del nuevo mensaje a todos los sockets */
         });
         
         socket.on('disconnect', data => {
