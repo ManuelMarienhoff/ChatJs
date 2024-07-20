@@ -33,9 +33,12 @@ $(function(){
 
 
     /* events */
+    /* envio datos desde el cliente al servidor como 'send message' */
     $messageForm.submit(e=>{
         e.preventDefault();
-        socket.emit('send message', $message.val());  /* envio datos desde el cliente al servidor como 'send message' */
+        socket.emit('send message', $message.val(), data => {
+            $chat.append(`<p class='error'> ${data}</p>`)
+        });  
         $message.val('')
     })
 
@@ -51,5 +54,10 @@ $(function(){
             html += `<p><i class='fa fa-user'></i> ${nicknames[i]}</p>`
         }
         $usernames.html(html)
+    })
+
+    /* Escucho mensaje privado desde el servidor */
+    socket.on('private', data => {
+        $chat.append(`<p class='private'><b>${data.nick}:</b> ${data.msg}</p>`)
     })
 })

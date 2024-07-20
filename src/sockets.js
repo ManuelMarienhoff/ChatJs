@@ -2,7 +2,8 @@
 
 module.exports = function(io){
 
-    let nicknames = [];
+    let users = {
+    };
 
 
     io.on("connection", (socket) => { 
@@ -10,33 +11,58 @@ module.exports = function(io){
 
         /* recibe nickname y callback */
         socket.on('new user', (nickname ,callback)=>{
-            if (nicknames.indexOf(nickname) >= 0){ /* si existe, no le muestro la interfaz del chat */
+            if (nickname in users){ /* si existe, no le muestro la interfaz del chat */
                 callback(false) ;
             } else { /* si no existe, lo agregamos */
                 callback(true);
                 socket.nickname = nickname; /* guardamos el nickname en la websocket */
-                nicknames.push(socket.nickname);
+                users[socket.nickname] = socket /* el nuevo usuario tiene la info completa del socket */
                 updateNicknames() /* envio todos los usuarios activos al cliente */
             }
         }); 
 
         /* el servidor escucha el mensaje que se manda desde el cliente y lo reenvia a todos los clientes */
-        socket.on('send message', data =>{  /* escucho mensaje del cliente */
-            io.sockets.emit('new message', {
-                msg: data,
-                nick: socket.nickname
-            }) /* envio datos del nuevo mensaje a todos los sockets */
+        socket.on('send message', (data, callback) =>{  /* escucho mensaje del cliente */
+
+            let msg = data.trim();
+
+            /* filtrar mensaje privado o grupal */
+            if(msg.substr(0,3) === "/p "){ /* mensaje privado */
+                msg = msg.substr(3); /* actualiza mensaje */
+                const index = msg.indexOf(' '); 
+                if (index != -1){ /* si encuentra ' ' entre nombre y msj  */
+                    let name = msg.substr(0,index)/* selecciona el nombre del receptor */
+                    msg = msg.substr(index + 1) /* actualiza mensaje */
+                    if (name in users){
+                        users[name].emit('private', { /* receptor */
+                            msg,
+                            nick: socket.nickname /* remitente */
+                        })
+                    } else {
+                        callback('Error! User does not exist')
+                    }
+                } else { /* NO encuentra ' ' entre nombre y msj */
+                    callback('Error! Please enter your message')
+                }
+
+            } else { /* mensaje grupal */
+                io.sockets.emit('new message', {
+                    msg: data,
+                    nick: socket.nickname
+                }) /* envio datos del nuevo mensaje a todos los sockets */
+            }
+
         });
         
         socket.on('disconnect', data => {
             if(!socket.nickname) return; /* si no encuentra usuario, return */
-            nicknames.splice(nicknames.indexOf(socket.nickname), 1); /* si encuentra, lo elimina del server*/
+            delete users[socket.nickname]
             updateNicknames() /* envio todos los usuarios activos al cliente */
 
         })
 
-        function updateNicknames(){
-            io.sockets.emit('usernames', nicknames) /* envio todos los usuarios activos al cliente */
+        function updateNicknames(){/* envio todos los usuarios activos al cliente */
+            io.sockets.emit('usernames', Object.keys(users)) 
 
         }
 

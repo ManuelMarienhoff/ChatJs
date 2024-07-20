@@ -5,3 +5,12 @@ body {
 #content-wrap{
   display: none;
 }
+
+.error {
+  color: red;
+}
+
+.private {
+  color: gray;
+  font-style: italic;
+}
