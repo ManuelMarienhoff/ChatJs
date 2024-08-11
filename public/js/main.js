@@ -60,4 +60,15 @@ $(function(){
     socket.on('private', data => {
         $chat.append(`<p class='private'><b>${data.nick}:</b> ${data.msg}</p>`)
     })
+
+    /* cargar viejos mensajes de la BDD */
+    socket.on('load old messages', messages => {
+        for (let i = 0; i < messages.length; i++){
+            displayMsg(messages[i])
+        }
+    })
+
+    function displayMsg(data){
+        $chat.append(`<p class='private'><b>${data.nick}:</b> ${data.msg}</p>`)
+    }
 })

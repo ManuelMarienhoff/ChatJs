@@ -1,13 +1,18 @@
 // conexion socket del servidor
 
+const chatSchema = require('./models/chat');
+
 module.exports = function(io){
 
-    let users = {
-    };
+    let users = {};
 
-
-    io.on("connection", (socket) => { 
+    io.on("connection", async (socket) => { 
         console.log("new user connected");
+
+        /* leer mensajes anteriores desde la BDD */
+        let messages = await chatSchema.find({})/* .limit(cantidad msj viejos que quiero ver) */
+        socket.emit('load old messages', messages);
+
 
         /* recibe nickname y callback */
         socket.on('new user', (nickname ,callback)=>{
@@ -22,7 +27,7 @@ module.exports = function(io){
         }); 
 
         /* el servidor escucha el mensaje que se manda desde el cliente y lo reenvia a todos los clientes */
-        socket.on('send message', (data, callback) =>{  /* escucho mensaje del cliente */
+        socket.on('send message', async (data, callback) =>{  /* escucho mensaje del cliente */
 
             let msg = data.trim();
 
@@ -45,9 +50,17 @@ module.exports = function(io){
                     callback('Error! Please enter your message')
                 }
 
+                
             } else { /* mensaje grupal */
+                /* guardo el mensaje en db */
+                var newMsg = new chatSchema({
+                    nick: socket.nickname,
+                    msg
+                });
+                await newMsg.save();
+
                 io.sockets.emit('new message', {
-                    msg: data,
+                    msg,
                     nick: socket.nickname
                 }) /* envio datos del nuevo mensaje a todos los sockets */
             }
