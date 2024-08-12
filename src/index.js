@@ -7,9 +7,10 @@ const server = http.createServer(app);
 const io = new Server(server); /* conexion de web socket, tiene a todos los sockets conectados*/
 
 const mongoose = require('mongoose');
+require('dotenv').config()
 
 /* db connection */
-mongoose.connect('mongodb://localhost/chat-database')
+mongoose.connect(process.env.MONGO_URI)
 .then(db => console.log('db is connected'))
 .catch(error => console.log(error))
 

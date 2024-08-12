@@ -1,0 +1,3 @@
+# Ignorar archivos de configuración y credenciales
+.env
+node_modules/
