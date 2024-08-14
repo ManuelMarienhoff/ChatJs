@@ -10,9 +10,15 @@ module.exports = function(io){
         console.log("new user connected");
 
         /* leer mensajes anteriores desde la BDD */
-        let messages = await chatSchema.find({})/* .limit(cantidad msj viejos que quiero ver) */
-        socket.emit('load old messages', messages);
+        let messages = await chatSchema.find({}).limit(8)
+        const formattedTimes = messages.map(message => {
+            return new Date(message.created_at).toLocaleTimeString('es-ES', {
+                hour: '2-digit',
+                minute: '2-digit',
+            });
+        });
 
+        socket.emit('load old messages', messages, formattedTimes);
 
         /* recibe nickname y callback */
         socket.on('new user', (nickname ,callback)=>{
@@ -41,7 +47,8 @@ module.exports = function(io){
                     if (name in users){
                         users[name].emit('private', { /* receptor */
                             msg,
-                            nick: socket.nickname /* remitente */
+                            nick: socket.nickname, /* remitente */
+                            time: formatTime()
                         })
                     } else {
                         callback('Error! User does not exist')
@@ -61,7 +68,8 @@ module.exports = function(io){
 
                 io.sockets.emit('new message', {
                     msg,
-                    nick: socket.nickname
+                    nick: socket.nickname,
+                    time: formatTime()
                 }) /* envio datos del nuevo mensaje a todos los sockets */
             }
 
@@ -77,6 +85,13 @@ module.exports = function(io){
         function updateNicknames(){/* envio todos los usuarios activos al cliente */
             io.sockets.emit('usernames', Object.keys(users)) 
 
+        }
+
+        function formatTime(){ /* formateo hora del mensaje en HH:MM */
+            const date = new Date()
+            const hours = date.getHours().toString().padStart(2, '0'); 
+            const minutes = date.getMinutes().toString().padStart(2, '0'); 
+            return `${hours}:${minutes}`; 
         }
 
     });

@@ -29,9 +29,7 @@ $(function(){
             $nickname.val('');
         });
     });
-
-
-
+    
     /* events */
     /* envio datos desde el cliente al servidor como 'send message' */
     $messageForm.submit(e=>{
@@ -44,7 +42,7 @@ $(function(){
 
     /* Escucho el mensaje que viene desde el servidor */
     socket.on('new message', function(data){
-        $chat.append(`<b> ${data.nick}</b>: ` + data.msg + '<br/>')
+        displayMsg(data)
     } )
 
     /* Recibo todos los usuarios activos del servidor */
@@ -58,17 +56,26 @@ $(function(){
 
     /* Escucho mensaje privado desde el servidor */
     socket.on('private', data => {
-        $chat.append(`<p class='private'><b>${data.nick}:</b> ${data.msg}</p>`)
+        displayOldOrPrivateMsg(data, data.time)
     })
 
     /* cargar viejos mensajes de la BDD */
-    socket.on('load old messages', messages => {
+    socket.on('load old messages', (messages, time) => {
         for (let i = 0; i < messages.length; i++){
-            displayMsg(messages[i])
+            displayOldOrPrivateMsg(messages[i], time[i])
+        }
+        if (messages.length < 8) {
+            document.getElementById('loadMore').hidden = true;
         }
     })
 
-    function displayMsg(data){
-        $chat.append(`<p class='private'><b>${data.nick}:</b> ${data.msg}</p>`)
+
+    function displayOldOrPrivateMsg(data, time){
+        $chat.append(`<p class='private'><b>${data.nick}:</b> ${data.msg} ${time}</p>`)
     }
+
+    function displayMsg(data){
+        $chat.append(`<b> ${data.nick}</b>: ` + data.msg + ` ${data.time}` + '<br/>')
+    }
+
 })
