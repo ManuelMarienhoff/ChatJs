@@ -9,8 +9,11 @@ module.exports = function(io){
     io.on("connection", async (socket) => { 
         console.log("new user connected");
 
+        const limit = 8
+        let offset = 0
+
         /* leer mensajes anteriores desde la BDD */
-        let messages = await chatSchema.find({}).limit(8)
+        let messages = await chatSchema.find({}).limit(limit)
         const formattedTimes = messages.map(message => {
             return new Date(message.created_at).toLocaleTimeString('es-ES', {
                 hour: '2-digit',
@@ -19,7 +22,23 @@ module.exports = function(io){
         });
 
         socket.emit('load old messages', messages, formattedTimes);
+        /* ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss */
+        socket.on('load more messages', async function() {
+            offset += limit
+            let messages = await chatSchema.find({})
+                .sort({ _id: -1 })
+                .skip(offset) // Saltar los mensajes que ya fueron cargados
+                .limit(limit); // Limitar la cantidad de mensajes a cargar
 
+            const formattedTimes = messages.map(message => {
+                return new Date(message.created_at).toLocaleTimeString('es-ES', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                });
+            });
+            socket.emit('display more messages', messages, formattedTimes);
+        });
+/* ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss */
         /* recibe nickname y callback */
         socket.on('new user', (nickname ,callback)=>{
             if (nickname in users){ /* si existe, no le muestro la interfaz del chat */
@@ -101,5 +120,8 @@ module.exports = function(io){
             return `${hours}:${minutes}`; 
         }
 
+
+
     });
+
 }

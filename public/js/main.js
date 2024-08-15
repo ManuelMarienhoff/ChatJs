@@ -14,6 +14,19 @@ $(function(){
     const $nickError = $('#nick-error');
     const $usernames = $('#usernames');
 
+    /* obtaining DOM elements */
+    const $loadMoreButton = $('#loadMore');
+
+    $loadMoreButton.on('click', function() {
+        socket.emit('load more messages');
+    });
+    
+    socket.on('display more messages', (messages,time)=>{
+        for (let i = 0; i < messages.length; i++){
+            $chat.prepend(`<p class='error'><b>${messages[i].nick}:</b> ${messages[i].msg} ${time[i]}</p>`)
+        }
+    })
+
     $nickForm.submit(e=>{
         e.preventDefault();
         socket.emit('new user', $nickname.val(), function(dataCallback){ /* envia al servidor nickname y callback */
