@@ -50,6 +50,13 @@ module.exports = function(io){
                             nick: socket.nickname, /* remitente */
                             time: formatTime()
                         })
+                    // Emite el mensaje al remitente (el mismo usuario que envía el mensaje)
+                    socket.emit('privateSelf', {
+                        msg,
+                        from: socket.nickname, // remitente (él mismo)
+                        to: name,
+                        time: formatTime()
+                    });
                     } else {
                         callback('Error! User does not exist')
                     }

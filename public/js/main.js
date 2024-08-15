@@ -54,9 +54,13 @@ $(function(){
         $usernames.html(html)
     })
 
-    /* Escucho mensaje privado desde el servidor */
+    /* Escucho mensaje privado desde el servidor para mostrar al receptor*/
     socket.on('private', data => {
         displayOldOrPrivateMsg(data, data.time)
+    })
+    /* escucho mensaje privado desde el servidor y se lo muestro al remitente */
+    socket.on('privateSelf', data => {
+        $chat.append(`<p class='private'><b>${data.from}: private to: </b> ${data.to} ${data.msg} ${data.time}</p>`)
     })
 
     /* cargar viejos mensajes de la BDD */
