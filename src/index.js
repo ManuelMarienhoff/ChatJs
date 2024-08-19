@@ -1,29 +1,30 @@
+// Import the necessary modules
 const http = require("http");
 const express = require("express");
 const { Server } = require("socket.io");
 
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server); /* conexion de web socket, tiene a todos los sockets conectados*/
+const server = http.createServer(app); // Create an HTTP server using the Express app
+const io = new Server(server); // Initialize a new instance of socket.io by passing the HTTP server
 
-const mongoose = require('mongoose');
-require('dotenv').config()
+const mongoose = require('mongoose'); // Import Mongoose for MongoDB interactions
+require('dotenv').config(); // Load environment variables from a .env file
 
-/* db connection */
+/* Database connection */
 mongoose.connect(process.env.MONGO_URI)
-.then(db => console.log('db is connected'))
-.catch(error => console.log(error))
+    .then(db => console.log('Database connected successfully')) 
+    .catch(error => console.log('Database connection error:', error)); 
 
-/* settings */
-app.set('port', process.env.PORT || 3000);
+/* Server settings */
+app.set('port', process.env.PORT || 3000); 
 
-/* cuando se conecte un nuevo socket */
-require("./sockets")(io);
+/* Handle socket connections */
+require("./sockets")(io); // Pass the io instance to the sockets module to handle real-time connections
 
-/* Use Static files */
+/* Static files */
 app.use(express.static('public'));
 
-/* Initializing server */
+/* Start the server */
 server.listen(app.get("port"), () => {
-    console.log(`Server on port ${app.get("port")}`);
+    console.log(`Server running on port ${app.get("port")}`);
 });
