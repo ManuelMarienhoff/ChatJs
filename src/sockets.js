@@ -32,14 +32,14 @@ module.exports = function(io) {
                 .sort({ _id: -1 })  // Sort by most recent messages
                 .skip(offset)       // Skip already loaded messages
                 .limit(limit);      // Limit the number of messages to load
-
+            let loadedAllMessages = messages.length < limit 
             const formattedTimes = messages.map(message => {
                 return new Date(message.created_at).toLocaleTimeString('es-ES', {
                     hour: '2-digit',
                     minute: '2-digit',
                 });
             });
-            socket.emit('display more messages', messages, formattedTimes);
+            socket.emit('display more messages', messages, formattedTimes, loadedAllMessages);
         });
 
         // Handle new user login

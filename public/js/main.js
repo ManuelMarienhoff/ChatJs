@@ -24,9 +24,13 @@ $(function() {
     });
     
     // Displays more messages received from the server
-    socket.on('display more messages', (messages, time) => {
+    socket.on('display more messages', (messages, time, loadedAllMessages) => {
         for (let i = 0; i < messages.length; i++) {
             $chat.prepend(`<p class='error'><b>${messages[i].nick}:</b> ${messages[i].msg} ${time[i]}</p>`);
+        }
+        if (loadedAllMessages){
+            $loadMoreButton.attr('hidden', true);
+            alert('There are no more messages to load')
         }
     });
 
