@@ -51,6 +51,7 @@ module.exports = function(io) {
                 socket.nickname = nickname;  // Assign the nickname to the socket
                 users[socket.nickname] = socket;  // Store user info in the users object
                 updateNicknames();  // Send updated list of active users to all clients
+                io.emit('user connected', nickname)
             }
         }); 
 
@@ -110,6 +111,7 @@ module.exports = function(io) {
             if (!socket.nickname) return;  // If no nickname, do nothing
             delete users[socket.nickname];  // Remove user from the users object
             updateNicknames();  // Send updated list of active users to all clients
+            io.emit('user disconnected', socket.nickname)
         });
 
         // Function to send the list of active users to all clients

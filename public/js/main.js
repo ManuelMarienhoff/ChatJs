@@ -23,6 +23,16 @@ $(function() {
         socket.emit('load more messages');
     });
     
+    // display message on user connection
+    socket.on('user connected', nickname =>{
+        $chat.append(`<b> ${nickname} is now online! </b> <br/>`);
+    })
+
+    // display message on user disconnection
+    socket.on('user disconnected', nickname =>{
+        $chat.append(`<b> ${nickname} disconnected </b> <br/>`);
+    })
+
     // Displays more messages received from the server
     socket.on('display more messages', (messages, time, loadedAllMessages) => {
         for (let i = 0; i < messages.length; i++) {
