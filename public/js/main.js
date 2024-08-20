@@ -1,74 +1,121 @@
-// conexion socket del cliente
+// Client socket connection setup
 
-$(function(){
-    const socket = io(); /* mantiene conexion en tiempo real con el sevidor */
+$(function() {
+    // Establishes and maintains a real-time connection with the server
+    const socket = io(); 
 
-    /* obtaining DOM elemens from the interface */
+    // DOM elements for the message form
     const $messageForm = $('#message-form');
     const $message = $('#message');
     const $chat = $('#chat');
 
-    /* obtaining DOM elemens from the nickname form */
+    // DOM elements for the nickname form
     const $nickForm = $('#nick-form');
     const $nickname = $('#nickname');
     const $nickError = $('#nick-error');
     const $usernames = $('#usernames');
 
-    $nickForm.submit(e=>{
+    // DOM element for loading more messages
+    const $loadMoreButton = $('#loadMore');
+
+    // Load more messages when the button is clicked
+    $loadMoreButton.on('click', function() {
+        socket.emit('load more messages');
+    });
+    
+    // display message on user connection
+    socket.on('user connected', nickname =>{
+        $chat.append(`<b> ${nickname} is now online! </b> <br/>`);
+    })
+
+    // display message on user disconnection
+    socket.on('user disconnected', nickname =>{
+        $chat.append(`<b> ${nickname} disconnected </b> <br/>`);
+    })
+
+    // Displays more messages received from the server
+    socket.on('display more messages', (messages, time, loadedAllMessages) => {
+        for (let i = 0; i < messages.length; i++) {
+            $chat.prepend(`<p class='error'><b>${messages[i].nick}:</b> ${messages[i].msg} ${time[i]}</p>`);
+        }
+        if (loadedAllMessages){
+            $loadMoreButton.attr('hidden', true);
+            alert('There are no more messages to load')
+        }
+    });
+
+    // Sends the nickname to the server and handles the response
+    $nickForm.submit(e => {
         e.preventDefault();
-        socket.emit('new user', $nickname.val(), function(dataCallback){ /* envia al servidor nickname y callback */
-            if(dataCallback){ /* si existe el usuario, ocultamos interfaz nickname y mostramos chat */
+        socket.emit('new user', $nickname.val(), function(dataCallback) {
+            if (dataCallback) { // If the nickname is accepted
                 $('#nick-wrap').hide();
                 $('#content-wrap').show();
-            } else {
+            } else { // If the nickname is already taken
                 $nickError.html(`
                     <div class='alert alert-danger'>
                     Username already taken
                     </div>`);
             }
-            $nickname.val('');
+            $nickname.val(''); // Clears the nickname input field
         });
     });
-
-
-
-    /* events */
-    /* envio datos desde el cliente al servidor como 'send message' */
-    $messageForm.submit(e=>{
+    
+    // Sends a message from the client to the server
+    $messageForm.submit(e => {
         e.preventDefault();
         socket.emit('send message', $message.val(), data => {
-            $chat.append(`<p class='error'> ${data}</p>`)
+            $chat.append(`<p class='error'>${data}</p>`); // Displays an error if there is one
         });  
-        $message.val('')
-    })
+        $message.val(''); // Clears the message input field
+    });
 
-    /* Escucho el mensaje que viene desde el servidor */
-    socket.on('new message', function(data){
-        $chat.append(`<b> ${data.nick}</b>: ` + data.msg + '<br/>')
-    } )
+    // Listens for a new message from the server and displays it in the chat
+    socket.on('new message', function(data) {
+        displayMsg(data);
+    });
 
-    /* Recibo todos los usuarios activos del servidor */
-    socket.on('usernames', nicknames =>{
+    // Receives and displays the list of active users from the server
+    socket.on('usernames', nicknames => {
         let html = '';
-        for (let i=0; i < nicknames.length; i++){
-            html += `<p><i class='fa fa-user'></i> ${nicknames[i]}</p>`
+        for (let i = 0; i < nicknames.length; i++) {
+            html += `<p><i class='fa fa-user'></i> ${nicknames[i]}</p>`;
         }
-        $usernames.html(html)
-    })
+        $usernames.html(html);
+    });
 
-    /* Escucho mensaje privado desde el servidor */
+    // Handles and displays private messages received
     socket.on('private', data => {
-        $chat.append(`<p class='private'><b>${data.nick}:</b> ${data.msg}</p>`)
-    })
+        displayOldOrPrivateMsg(data, data.time);
+    });
 
-    /* cargar viejos mensajes de la BDD */
-    socket.on('load old messages', messages => {
-        for (let i = 0; i < messages.length; i++){
-            displayMsg(messages[i])
+    // Displays the private message sent by the user
+    socket.on('privateSelf', data => {
+        $chat.append(`<p class='private'><b>${data.from}: private to:</b> ${data.to} ${data.msg} ${data.time}</p>`);
+    });
+
+    // Loads and displays old messages from the database
+    socket.on('load old messages', (messages, time) => {
+        for (let i = 0; i < messages.length; i++) {
+            displayOldOrPrivateMsg(messages[i], time[i]);
         }
-    })
+        if (messages.length < 8) { // Hides the button if there are fewer than 8 messages
+            document.getElementById('loadMore').hidden = true;
+        }
+    });
 
-    function displayMsg(data){
-        $chat.append(`<p class='private'><b>${data.nick}:</b> ${data.msg}</p>`)
+    // Function to display old or private messages in the chat
+    function displayOldOrPrivateMsg(data, time) {
+        $chat.append(`<p class='private'><b>${data.nick}:</b> ${data.msg} ${time}</p>`);
     }
-})
+
+    // Function to display new messages in the chat
+    function displayMsg(data) {
+        $chat.append(`<b>${data.nick}</b>: ${data.msg} ${data.time}<br/>`);
+    }
+
+    /* Handles clear chat command */
+    socket.on('clear chat', ()=>{
+        $chat.html('');
+    });
+});
