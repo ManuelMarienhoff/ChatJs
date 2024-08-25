@@ -106,12 +106,28 @@ $(function() {
 
     // Function to display old or private messages in the chat
     function displayOldOrPrivateMsg(data, time) {
-        $chat.append(`<p class='private'><b>${data.nick}:</b> ${data.msg} ${time}</p>`);
+        $chat.append(`<div class="chat-bubble private">
+                <div class="chat-header">
+                    ${data.nick}
+                </div>
+                <div class="chat-message">
+                    ${data.msg}
+                </div>
+                <div class="chat-time">${time}</div>
+              </div><br/>`);
     }
 
     // Function to display new messages in the chat
     function displayMsg(data) {
-        $chat.append(`<b>${data.nick}</b>: ${data.msg} ${data.time}<br/>`);
+        $chat.append(`<div class="chat-bubble">
+                <div class="chat-header">
+                    ${data.nick}
+                </div>
+                <div class="chat-message">
+                    ${data.msg}
+                </div>
+                <div class="chat-time">${data.time}</div>
+              </div><br/>`);
     }
 
     /* Handles clear chat command */
