@@ -10,10 +10,6 @@ body {
   color: red;
 }
 
-.private {
-  color: gray;
-  font-style: italic;
-}
 
 #chat {
   height: 400px; 
@@ -21,3 +17,46 @@ body {
   border: 1px solid #ccc; 
   padding: 10px; 
 }
+
+.chat-bubble {
+  display: inline-block;
+  max-width: 70%;
+  margin-bottom: 10px;
+  padding: 8px 20px 8px 10px;
+  border-radius: 15px;
+  background-color: #b2fab4;
+  color: #000;
+  font-size: 14px;
+  line-height: 1.4;
+  position: relative;
+}
+
+.chat-time {
+  font-size: 10px;
+  color: #555;
+  position: absolute;
+  bottom: 3px; 
+  right: 10px;
+}
+
+.bubble-pos-right{
+  position: absolute;
+  right: 0px;
+}
+
+.private {
+  background-color: yellow;
+}
+
+.old{
+  background-color: #eeeeee;
+}
+.chat-header {
+  font-weight: bold;
+}
+
+.chat-message {
+  margin-bottom: 5px;
+}
+
+
