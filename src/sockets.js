@@ -76,7 +76,7 @@ module.exports = function(io) {
                         // Send confirmation of private message to the sender
                         socket.emit('privateSelf', {
                             msg,
-                            from: socket.nickname,  // Sender's nickname
+                            nick: socket.nickname,  // Sender's nickname
                             to: name,  // Recipient's name
                             time: formatTime()
                         });

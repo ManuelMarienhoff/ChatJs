@@ -36,7 +36,15 @@ $(function() {
     // Displays more messages received from the server
     socket.on('display more messages', (messages, time, loadedAllMessages) => {
         for (let i = 0; i < messages.length; i++) {
-            $chat.prepend(`<p class='error'><b>${messages[i].nick}:</b> ${messages[i].msg} ${time[i]}</p>`);
+            $chat.prepend(`<div class="chat-bubble old">
+                <div class="chat-header">
+                    ${messages[i].nick}
+                </div>
+                <div class="chat-message">
+                    ${messages[i].msg}
+                </div>
+                <div class="chat-time">${time[i]}</div>
+              </div><br/>`);
         }
         if (loadedAllMessages){
             $loadMoreButton.attr('hidden', true);
@@ -86,13 +94,13 @@ $(function() {
 
     // Handles and displays private messages received
     socket.on('private', data => {
-        displayOldOrPrivateMsg(data, data.time);
+        displayPrivateMsg(data);
     });
 
     // Displays the private message sent by the user
     socket.on('privateSelf', data => {
-        $chat.append(`<p class='private'><b>${data.from}: private to:</b> ${data.to} ${data.msg} ${data.time}</p>`);
-    });
+        displayPrivateMsg(data);
+    }); 
 
     // Loads and displays old messages from the database
     socket.on('load old messages', (messages, time) => {
@@ -106,7 +114,7 @@ $(function() {
 
     // Function to display old or private messages in the chat
     function displayOldOrPrivateMsg(data, time) {
-        $chat.append(`<div class="chat-bubble private">
+        $chat.append(`<div class="chat-bubble old">
                 <div class="chat-header">
                     ${data.nick}
                 </div>
@@ -119,7 +127,10 @@ $(function() {
 
     // Function to display new messages in the chat
     function displayMsg(data) {
-        $chat.append(`<div class="chat-bubble">
+        const bubbleClass = data.nick == nickname ? 'bubble-pos-right' : ''
+        console.log(data.nick)
+        console.log(nickname)
+        $chat.append(`<div class="chat-bubble ${bubbleClass}">
                 <div class="chat-header">
                     ${data.nick}
                 </div>
@@ -128,6 +139,18 @@ $(function() {
                 </div>
                 <div class="chat-time">${data.time}</div>
               </div><br/>`);
+    }
+
+    function displayPrivateMsg(data){
+        $chat.append(`<div class="chat-bubble private">
+            <div class="chat-header">
+                ${data.nick}
+            </div>
+            <div class="chat-message">
+                ${data.msg}
+            </div>
+            <div class="chat-time">${data.time}</div>
+          </div><br/>`);
     }
 
     /* Handles clear chat command */
